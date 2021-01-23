@@ -1395,6 +1395,16 @@ namespace OpenSim.Region.ScriptEngine.Shared.ScriptBase
             m_LSL_Functions.llResetTime();
         }
 
+        public LSL_Integer llReturnObjectsByID(LSL_List objects)
+        {
+            return m_LSL_Functions.llReturnObjectsByID(objects);
+        }
+
+        public LSL_Integer llReturnObjectsByOwner(string owner, LSL_Integer scope)
+        {
+            return m_LSL_Functions.llReturnObjectsByOwner(owner, scope);
+        }
+
         public void llRezAtRoot(string inventory, LSL_Vector position, LSL_Vector velocity, LSL_Rotation rot, int param)
         {
             m_LSL_Functions.llRezAtRoot(inventory, position, velocity, rot, param);

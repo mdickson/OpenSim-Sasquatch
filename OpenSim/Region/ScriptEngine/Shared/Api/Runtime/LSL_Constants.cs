@@ -85,7 +85,9 @@ namespace OpenSim.Region.ScriptEngine.Shared.ScriptBase
         public const int PERMISSION_TRACK_CAMERA = 1024;
         public const int PERMISSION_CONTROL_CAMERA = 2048;
         public const int PERMISSION_TELEPORT = 4096;
+        public const int PERMISSION_SILENT_ESTATE_MANAGEMENT = 0x4000;
         public const int PERMISSION_OVERRIDE_ANIMATIONS = 0x8000;
+        public const int PERMISSION_RETURN_OBJECTS = 0x10000;
 
         public const int AGENT_FLYING = 0x1;
         //ApiDesc The agent has attachments

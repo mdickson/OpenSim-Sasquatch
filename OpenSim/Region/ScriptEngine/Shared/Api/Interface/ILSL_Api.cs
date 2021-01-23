@@ -320,6 +320,8 @@ namespace OpenSim.Region.ScriptEngine.Shared.Api.Interfaces
               void llResetOtherScript(string name);
               void llResetScript();
               void llResetTime();
+        LSL_Integer llReturnObjectsByID(LSL_List objects);
+        LSL_Integer llReturnObjectsByOwner(string owner, LSL_Integer scope);
               void llRezAtRoot(string inventory, LSL_Vector position, LSL_Vector velocity, LSL_Rotation rot, int param);
               void llRezObject(string inventory, LSL_Vector pos, LSL_Vector vel, LSL_Rotation rot, int param);
          LSL_Float llRot2Angle(LSL_Rotation rot);
