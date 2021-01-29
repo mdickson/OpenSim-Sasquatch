@@ -7647,7 +7647,7 @@ namespace OpenSim.Region.ScriptEngine.Shared.Api
             SetParticleSystem(m_host, rules, "llParticleSystem");
         }
 
-        private void SetParticleSystem(SceneObjectPart part, LSL_List rules, string originFunc)
+        public void SetParticleSystem(SceneObjectPart part, LSL_List rules, string originFunc, bool expire = false)
         {
             if (rules.Length == 0)
             {
@@ -7676,7 +7676,7 @@ namespace OpenSim.Region.ScriptEngine.Shared.Api
                     }
                     switch (psystype)
                     {
-                        case (int)ScriptBaseClass.PSYS_PART_FLAGS:
+                        case ScriptBaseClass.PSYS_PART_FLAGS:
                             try
                             {
                                 prules.PartDataFlags = (Primitive.ParticleSystem.ParticleDataFlags)(uint)rules.GetLSLIntegerItem(i + 1);
@@ -7688,7 +7688,7 @@ namespace OpenSim.Region.ScriptEngine.Shared.Api
                             }
                             break;
 
-                        case (int)ScriptBaseClass.PSYS_PART_START_COLOR:
+                        case ScriptBaseClass.PSYS_PART_START_COLOR:
                             try
                             {
                                 tempv = rules.GetVector3Item(i + 1);
@@ -7703,7 +7703,7 @@ namespace OpenSim.Region.ScriptEngine.Shared.Api
                             prules.PartStartColor.B = (float)tempv.z;
                             break;
 
-                        case (int)ScriptBaseClass.PSYS_PART_START_ALPHA:
+                        case ScriptBaseClass.PSYS_PART_START_ALPHA:
                             try
                             {
                                 tempf = (float)rules.GetLSLFloatItem(i + 1);
@@ -7716,7 +7716,7 @@ namespace OpenSim.Region.ScriptEngine.Shared.Api
                             prules.PartStartColor.A = tempf;
                             break;
 
-                        case (int)ScriptBaseClass.PSYS_PART_END_COLOR:
+                        case ScriptBaseClass.PSYS_PART_END_COLOR:
                             try
                             {
                                 tempv = rules.GetVector3Item(i + 1);
@@ -7731,7 +7731,7 @@ namespace OpenSim.Region.ScriptEngine.Shared.Api
                             prules.PartEndColor.B = (float)tempv.z;
                             break;
 
-                        case (int)ScriptBaseClass.PSYS_PART_END_ALPHA:
+                        case ScriptBaseClass.PSYS_PART_END_ALPHA:
                             try
                             {
                                 tempf = (float)rules.GetLSLFloatItem(i + 1);
@@ -7744,7 +7744,7 @@ namespace OpenSim.Region.ScriptEngine.Shared.Api
                             prules.PartEndColor.A = tempf;
                             break;
 
-                        case (int)ScriptBaseClass.PSYS_PART_START_SCALE:
+                        case ScriptBaseClass.PSYS_PART_START_SCALE:
                             try
                             {
                                 tempv = rules.GetVector3Item(i + 1);
@@ -7758,7 +7758,7 @@ namespace OpenSim.Region.ScriptEngine.Shared.Api
                             prules.PartStartScaleY = validParticleScale((float)tempv.y);
                             break;
 
-                        case (int)ScriptBaseClass.PSYS_PART_END_SCALE:
+                        case ScriptBaseClass.PSYS_PART_END_SCALE:
                             try
                             {
                                 tempv = rules.GetVector3Item(i + 1);
@@ -7772,7 +7772,7 @@ namespace OpenSim.Region.ScriptEngine.Shared.Api
                             prules.PartEndScaleY = validParticleScale((float)tempv.y);
                             break;
 
-                        case (int)ScriptBaseClass.PSYS_PART_MAX_AGE:
+                        case ScriptBaseClass.PSYS_PART_MAX_AGE:
                             try
                             {
                                 tempf = (float)rules.GetLSLFloatItem(i + 1);
@@ -7785,7 +7785,7 @@ namespace OpenSim.Region.ScriptEngine.Shared.Api
                             prules.PartMaxAge = tempf;
                             break;
 
-                        case (int)ScriptBaseClass.PSYS_SRC_ACCEL:
+                        case ScriptBaseClass.PSYS_SRC_ACCEL:
                             try
                             {
                                 tempv = rules.GetVector3Item(i + 1);
@@ -7800,7 +7800,7 @@ namespace OpenSim.Region.ScriptEngine.Shared.Api
                             prules.PartAcceleration.Z = (float)tempv.z;
                             break;
 
-                        case (int)ScriptBaseClass.PSYS_SRC_PATTERN:
+                        case ScriptBaseClass.PSYS_SRC_PATTERN:
                             try
                             {
                                 tmpi = (int)rules.GetLSLIntegerItem(i + 1);
@@ -7817,7 +7817,7 @@ namespace OpenSim.Region.ScriptEngine.Shared.Api
                         // PSYS_SRC_OUTERANGLE and PSYS_SRC_ANGLE_END also use the same variable. The
                         // client tells the difference between the two by looking at the 0x02 bit in
                         // the PartFlags variable.
-                        case (int)ScriptBaseClass.PSYS_SRC_INNERANGLE:
+                        case ScriptBaseClass.PSYS_SRC_INNERANGLE:
                             try
                             {
                                 tempf = (float)rules.GetLSLFloatItem(i + 1);
@@ -7831,7 +7831,7 @@ namespace OpenSim.Region.ScriptEngine.Shared.Api
                             prules.PartFlags &= 0xFFFFFFFD; // Make sure new angle format is off.
                             break;
 
-                        case (int)ScriptBaseClass.PSYS_SRC_OUTERANGLE:
+                        case ScriptBaseClass.PSYS_SRC_OUTERANGLE:
                             try
                             {
                                 tempf = (float)rules.GetLSLFloatItem(i + 1);
@@ -7845,7 +7845,7 @@ namespace OpenSim.Region.ScriptEngine.Shared.Api
                             prules.PartFlags &= 0xFFFFFFFD; // Make sure new angle format is off.
                             break;
 
-                        case (int)ScriptBaseClass.PSYS_PART_BLEND_FUNC_SOURCE:
+                        case ScriptBaseClass.PSYS_PART_BLEND_FUNC_SOURCE:
                             try
                             {
                                 tmpi = (int)rules.GetLSLIntegerItem(i + 1);
@@ -7858,7 +7858,7 @@ namespace OpenSim.Region.ScriptEngine.Shared.Api
                             prules.BlendFuncSource = (byte)tmpi;
                             break;
 
-                        case (int)ScriptBaseClass.PSYS_PART_BLEND_FUNC_DEST:
+                        case ScriptBaseClass.PSYS_PART_BLEND_FUNC_DEST:
                             try
                             {
                                 tmpi = (int)rules.GetLSLIntegerItem(i + 1);
@@ -7871,7 +7871,7 @@ namespace OpenSim.Region.ScriptEngine.Shared.Api
                             prules.BlendFuncDest = (byte)tmpi;
                             break;
 
-                        case (int)ScriptBaseClass.PSYS_PART_START_GLOW:
+                        case ScriptBaseClass.PSYS_PART_START_GLOW:
                             try
                             {
                                 tempf = (float)rules.GetLSLFloatItem(i + 1);
@@ -7884,7 +7884,7 @@ namespace OpenSim.Region.ScriptEngine.Shared.Api
                             prules.PartStartGlow = (float)tempf;
                             break;
 
-                        case (int)ScriptBaseClass.PSYS_PART_END_GLOW:
+                        case ScriptBaseClass.PSYS_PART_END_GLOW:
                             try
                             {
                                 tempf = (float)rules.GetLSLFloatItem(i + 1);
@@ -7897,7 +7897,7 @@ namespace OpenSim.Region.ScriptEngine.Shared.Api
                             prules.PartEndGlow = (float)tempf;
                             break;
 
-                        case (int)ScriptBaseClass.PSYS_SRC_TEXTURE:
+                        case ScriptBaseClass.PSYS_SRC_TEXTURE:
                             try
                             {
                                 prules.Texture = ScriptUtils.GetAssetIdFromKeyOrItemName(m_host, rules.GetLSLStringItem(i + 1));
@@ -7909,7 +7909,7 @@ namespace OpenSim.Region.ScriptEngine.Shared.Api
                             }
                             break;
 
-                        case (int)ScriptBaseClass.PSYS_SRC_BURST_RATE:
+                        case ScriptBaseClass.PSYS_SRC_BURST_RATE:
                             try
                             {
                                 tempf = (float)rules.GetLSLFloatItem(i + 1);
@@ -7922,7 +7922,7 @@ namespace OpenSim.Region.ScriptEngine.Shared.Api
                             prules.BurstRate = (float)tempf;
                             break;
 
-                        case (int)ScriptBaseClass.PSYS_SRC_BURST_PART_COUNT:
+                        case ScriptBaseClass.PSYS_SRC_BURST_PART_COUNT:
                             try
                             {
                                 prules.BurstPartCount = (byte)(int)rules.GetLSLIntegerItem(i + 1);
@@ -7934,7 +7934,7 @@ namespace OpenSim.Region.ScriptEngine.Shared.Api
                             }
                             break;
 
-                        case (int)ScriptBaseClass.PSYS_SRC_BURST_RADIUS:
+                        case ScriptBaseClass.PSYS_SRC_BURST_RADIUS:
                             try
                             {
                                 tempf = (float)rules.GetLSLFloatItem(i + 1);
@@ -7947,7 +7947,7 @@ namespace OpenSim.Region.ScriptEngine.Shared.Api
                             prules.BurstRadius = (float)tempf;
                             break;
 
-                        case (int)ScriptBaseClass.PSYS_SRC_BURST_SPEED_MIN:
+                        case ScriptBaseClass.PSYS_SRC_BURST_SPEED_MIN:
                             try
                             {
                                 tempf = (float)rules.GetLSLFloatItem(i + 1);
@@ -7960,7 +7960,7 @@ namespace OpenSim.Region.ScriptEngine.Shared.Api
                             prules.BurstSpeedMin = (float)tempf;
                             break;
 
-                        case (int)ScriptBaseClass.PSYS_SRC_BURST_SPEED_MAX:
+                        case ScriptBaseClass.PSYS_SRC_BURST_SPEED_MAX:
                             try
                             {
                                 tempf = (float)rules.GetLSLFloatItem(i + 1);
@@ -7973,7 +7973,7 @@ namespace OpenSim.Region.ScriptEngine.Shared.Api
                             prules.BurstSpeedMax = (float)tempf;
                             break;
 
-                        case (int)ScriptBaseClass.PSYS_SRC_MAX_AGE:
+                        case ScriptBaseClass.PSYS_SRC_MAX_AGE:
                             try
                             {
                                 tempf = (float)rules.GetLSLFloatItem(i + 1);
@@ -7986,7 +7986,7 @@ namespace OpenSim.Region.ScriptEngine.Shared.Api
                             prules.MaxAge = (float)tempf;
                             break;
 
-                        case (int)ScriptBaseClass.PSYS_SRC_TARGET_KEY:
+                        case ScriptBaseClass.PSYS_SRC_TARGET_KEY:
                             UUID key = UUID.Zero;
                             if (UUID.TryParse(rules.Data[i + 1].ToString(), out key))
                             {
@@ -7998,7 +7998,7 @@ namespace OpenSim.Region.ScriptEngine.Shared.Api
                             }
                             break;
 
-                        case (int)ScriptBaseClass.PSYS_SRC_OMEGA:
+                        case ScriptBaseClass.PSYS_SRC_OMEGA:
                             // AL: This is an assumption, since it is the only thing that would match.
                             try
                             {
@@ -8014,7 +8014,7 @@ namespace OpenSim.Region.ScriptEngine.Shared.Api
                             prules.AngularVelocity.Z = (float)tempv.z;
                             break;
 
-                        case (int)ScriptBaseClass.PSYS_SRC_ANGLE_BEGIN:
+                        case ScriptBaseClass.PSYS_SRC_ANGLE_BEGIN:
                             try
                             {
                                 tempf = (float)rules.GetLSLFloatItem(i + 1);
@@ -8028,7 +8028,7 @@ namespace OpenSim.Region.ScriptEngine.Shared.Api
                             prules.PartFlags |= 0x02; // Set new angle format.
                             break;
 
-                        case (int)ScriptBaseClass.PSYS_SRC_ANGLE_END:
+                        case ScriptBaseClass.PSYS_SRC_ANGLE_END:
                             try
                             {
                                 tempf = (float)rules.GetLSLFloatItem(i + 1);
@@ -8046,8 +8046,9 @@ namespace OpenSim.Region.ScriptEngine.Shared.Api
                 }
                 prules.CRC = 1;
 
-                part.AddNewParticleSystem(prules);
-                part.ParentGroup.HasGroupChanged = true;
+                part.AddNewParticleSystem(prules, expire);
+                if(!expire || prules.MaxAge != 0 || prules.MaxAge > 300)
+                    part.ParentGroup.HasGroupChanged = true;
             }
             part.SendFullUpdateToAllClients();
         }
