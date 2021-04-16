@@ -545,7 +545,7 @@ namespace OpenSim.Region.ClientStack.LindenUDP
 
             RegisterLocalPacketHandlers();
             string name = string.Format("AsyncInUDP-{0}",m_agentId.ToString());
-            m_asyncPacketProcess = new JobEngine(name, name, 10000);
+            m_asyncPacketProcess = new JobEngine(name, name, 5000);
             IsActive = true;
 
             m_supportViewerCache = m_udpServer.SupportViewerObjectsCache;
@@ -3240,6 +3240,8 @@ namespace OpenSim.Region.ClientStack.LindenUDP
             OutPacket(viewertime, ThrottleOutPacketType.Task);
         }
 
+
+
         public void SendViewerEffect(ViewerEffectPacket.EffectBlock[] effectBlocks)
         {
             ViewerEffectPacket packet = (ViewerEffectPacket)PacketPool.Instance.GetPacket(PacketType.ViewerEffect);
@@ -4207,6 +4209,10 @@ namespace OpenSim.Region.ClientStack.LindenUDP
 
         public void SendClassifiedInfoReply(UUID classifiedID, UUID creatorID, uint creationDate, uint expirationDate, uint category, string name, string description, UUID parcelID, uint parentEstate, UUID snapshotID, string simName, Vector3 globalPos, string parcelName, byte classifiedFlags, int price)
         {
+            // fix classifiedFlags maturity
+            if((classifiedFlags & 0x4e) == 0) // if none
+                classifiedFlags |= 0x4; // pg
+
             ClassifiedInfoReplyPacket cr =
                     (ClassifiedInfoReplyPacket)PacketPool.Instance.GetPacket(
                     PacketType.ClassifiedInfoReply);
@@ -8340,7 +8346,7 @@ namespace OpenSim.Region.ClientStack.LindenUDP
         {
             if(OnAgentUpdate == null)
             {
-                PacketPool.Instance.ReturnPacket(packet);
+                //PacketPool.Instance.ReturnPacket(packet);
                 return;
             }
 
@@ -8349,7 +8355,7 @@ namespace OpenSim.Region.ClientStack.LindenUDP
 
             if (x.AgentID != AgentId || x.SessionID != SessionId)
             {
-                PacketPool.Instance.ReturnPacket(packet);
+                //PacketPool.Instance.ReturnPacket(packet);
                 return;
             }
 
@@ -8362,7 +8368,7 @@ namespace OpenSim.Region.ClientStack.LindenUDP
             {
                 // throttle reset is done at MoveAgentIntoRegion()
                 // called by scenepresence on completemovement
-                PacketPool.Instance.ReturnPacket(packet);
+                //PacketPool.Instance.ReturnPacket(packet);
                 return;
             }
 
@@ -8416,7 +8422,7 @@ namespace OpenSim.Region.ClientStack.LindenUDP
             if(movement && camera)
                 m_thisAgentUpdateArgs.lastUpdateTS = now;
 
-            PacketPool.Instance.ReturnPacket(packet);
+            //PacketPool.Instance.ReturnPacket(packet);
         }
 
         private void HandleMoneyTransferRequest(Packet Pack)
@@ -12330,6 +12336,11 @@ namespace OpenSim.Region.ClientStack.LindenUDP
             if (classifiedInfoUpdate.AgentData.SessionID != SessionId || classifiedInfoUpdate.AgentData.AgentID != AgentId)
                 return;
 
+            // fix classifiedFlags maturity
+            byte classifiedFlags = classifiedInfoUpdate.Data.ClassifiedFlags;
+            if ((classifiedFlags & 0x4e) == 0) // if none
+                classifiedFlags |= 0x4; // pg
+
             OnClassifiedInfoUpdate?.Invoke(
                         classifiedInfoUpdate.Data.ClassifiedID,
                         classifiedInfoUpdate.Data.Category,
@@ -12342,7 +12353,7 @@ namespace OpenSim.Region.ClientStack.LindenUDP
                         classifiedInfoUpdate.Data.SnapshotID,
                         new Vector3(
                             classifiedInfoUpdate.Data.PosGlobal),
-                        classifiedInfoUpdate.Data.ClassifiedFlags,
+                        classifiedFlags,
                         classifiedInfoUpdate.Data.PriceForListing,
                         this);
         }
