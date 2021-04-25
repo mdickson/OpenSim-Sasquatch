@@ -4268,6 +4268,34 @@ namespace OpenSim.Region.ScriptEngine.Shared.Api
             m_LSL_Api.DetachFromAvatar();
         }
 
+        private bool listObjToInt(object p, out int i)
+        {
+            try
+            {
+                if (p is LSL_Integer)
+                    i = (LSL_Integer)p;
+                else if (p is int)
+                    i = (int)p;
+                else if (p is uint)
+                    i = (int)(uint)p;
+                else if (p is string)
+                    return int.TryParse((string)p, out i);
+                else if (p is LSL_String)
+                    return int.TryParse((string)(LSL_String)p, out i);
+                else
+                {
+                    i = 0;
+                    return false;
+                }
+                return true;
+            }
+            catch
+            {
+                i = 0;
+                return false;
+            }
+        }
+
         public LSL_List osGetNumberOfAttachments(LSL_Key avatar, LSL_List attachmentPoints)
         {
             CheckThreatLevel(ThreatLevel.Moderate, "osGetNumberOfAttachments");
@@ -4278,12 +4306,8 @@ namespace OpenSim.Region.ScriptEngine.Shared.Api
             {
                 foreach (object point in attachmentPoints.Data)
                 {
-                    LSL_Integer ipoint = new LSL_Integer(
-                        (point is LSL_Integer || point is int || point is uint) ?
-                            (int)point :
-                            0
-                    );
-                    resp.Add(ipoint);
+                    listObjToInt(point, out int ipoint);
+                    resp.Add(new LSL_Integer(ipoint));
                     if (ipoint == 0)
                     {
                         // indicates zero attachments
@@ -5647,6 +5671,16 @@ namespace OpenSim.Region.ScriptEngine.Shared.Api
             return LSL_Rotation.Slerp(a, b, amount);
         }
 
+        public LSL_Vector osSlerp(LSL_Vector a, LSL_Vector b, LSL_Float amount)
+        {
+            if (amount < 0)
+                amount = 0;
+            else if (amount > 1.0)
+                amount = 1.0;
+
+            return LSL_Vector.Slerp(a, b, amount);
+        }
+
         public void osResetAllScripts(LSL_Integer linkset)
         {
             UUID me = m_item.ItemID;
@@ -6009,6 +6043,88 @@ namespace OpenSim.Region.ScriptEngine.Shared.Api
             m_envModule.StoreOnRegion(null);
             m_envModule.WindlightRefresh(transition);
             return 1;
+        }
+
+        public void osParticleSystem(LSL_List rules)
+        {
+            m_host.AddScriptLPS(1);
+
+            InitLSL();
+            if (m_LSL_Api != null)
+                m_LSL_Api.SetParticleSystem(m_host, rules, "osParticleSystem", true);
+        }
+
+        public void osLinkParticleSystem(LSL_Integer linknumber, LSL_List rules)
+        {
+            InitLSL();
+            if (m_LSL_Api != null)
+            {
+                List<SceneObjectPart> parts = m_LSL_Api.GetLinkParts(linknumber);
+
+                foreach (SceneObjectPart part in parts)
+                {
+                    m_LSL_Api.SetParticleSystem(part, rules, "osLinkParticleSystem", true);
+                }
+            }
+        }
+
+        public LSL_Integer osNpcLookAt(LSL_Key npckey, LSL_Integer ltype, LSL_Key objkey, LSL_Vector offset)
+        {
+            if (World.GetNumberOfClients() == 0)
+                return 0;
+
+            if (ltype < 0 || ltype > ScriptBaseClass.NPCLOOKAT_CLEAR)
+                return -1;
+
+            if (!UUID.TryParse(npckey, out UUID npc))
+                return -2;
+
+            ScenePresence npcSP = World.GetScenePresence(npc);
+            if((npcSP == null) || !npcSP.IsNPC)
+                return -3;
+
+            if (!UUID.TryParse(objkey, out UUID obj))
+                return -4;
+
+            if(obj != UUID.Zero)
+            {
+                ScenePresence objSP = World.GetScenePresence(obj);
+                if(objSP == null)
+                {
+                    SceneObjectPart objSOP = World.GetSceneObjectPart(obj);
+                    if(objSOP == null)
+                        return -5;
+                }
+            }
+
+            byte[] data = new byte[57];
+            npc.ToBytes(data, 0);
+            obj.ToBytes(data, 16);
+            Vector3d vd = new Vector3d(offset.x, offset.y, offset.z);
+            vd.ToBytes(data, 32);
+            data[56] = (byte)(int)ltype;
+
+            OpenMetaverse.Packets.ViewerEffectPacket.EffectBlock effect = new OpenMetaverse.Packets.ViewerEffectPacket.EffectBlock();
+            effect.AgentID = npc;
+            effect.Color = new byte[4];
+            effect.Duration = 0;
+            effect.ID = UUID.Random();
+            effect.Type = 14;
+            effect.TypeData = data;
+
+            OpenMetaverse.Packets.ViewerEffectPacket.EffectBlock[] effectblock = new OpenMetaverse.Packets.ViewerEffectPacket.EffectBlock[1];
+            effectblock[0] = effect;
+
+            World.ForEachScenePresence(
+             sp =>
+             {
+                if(!sp.IsNPC && !sp.IsDeleted)
+                {
+                    sp.ControllingClient.SendViewerEffect(effectblock);
+                }
+             });
+
+            return 0;
         }
     }
 }
