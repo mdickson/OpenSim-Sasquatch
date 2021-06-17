@@ -94,6 +94,7 @@
     <Compile Remove="Framework\Caps\CapabilitiesModule.cs" />
     <Compile Remove="Framework\DynamicAttributes\DAExampleModule.cs" />
     <Compile Remove="Framework\DynamicAttributes\DOExampleModule.cs" />
+    <Compile Remove="Framework\EMail\SMTPModule.cs" />
     <Compile Remove="Framework\EntityTransfer\EntityTransferModule.cs" />
     <Compile Remove="Framework\EntityTransfer\EntityTransferStateMachine.cs" />
     <Compile Remove="Framework\EntityTransfer\HGEntityTransferModule.cs" />
@@ -277,6 +278,7 @@
     <Compile Remove="World\Wind\Plugins\SimpleRandomWind.cs" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="MailKit" Version="2.13.0" />
     <PackageReference Include="NUnit" Version="2.7.1" />
     <PackageReference Include="NUnitTestAdapter" Version="2.3.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.10.0" />
