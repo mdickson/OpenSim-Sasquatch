@@ -65,6 +65,7 @@ namespace OpenSim.Region.CoreModules.Framework.EMail
         private string SMTP_SERVER_LOGIN = string.Empty;
         private string SMTP_SERVER_PASSWORD = string.Empty;
         private string SMTP_SERVER_REPLYTO = string.Empty;
+        private string SMTP_HOSTNAME = string.Empty;
 
         // Scenes by Region Handle
         private Dictionary<ulong, Scene> m_Scenes = new Dictionary<ulong, Scene>();
@@ -101,7 +102,8 @@ namespace OpenSim.Region.CoreModules.Framework.EMail
                 SMTP_SERVER_PORT = SMTPConfig.GetInt("SMTP_SERVER_PORT", SMTP_SERVER_PORT);
                 SMTP_SERVER_LOGIN = SMTPConfig.GetString("SMTP_SERVER_LOGIN", SMTP_SERVER_LOGIN);
                 SMTP_SERVER_PASSWORD = SMTPConfig.GetString("SMTP_SERVER_PASSWORD", SMTP_SERVER_PASSWORD);
-                SMTP_SERVER_REPLYTO = SMTPConfig.GetString("SMTP_SERVER_REPLYTO", SMTP_SERVER_REPLYTO);
+                SMTP_SERVER_REPLYTO = SMTPConfig.GetString("SMTP_SERVER_REPLYTO", SMTP_SERVER_REPLYTO); 
+                SMTP_HOSTNAME = SMTPConfig.GetString("host_domain_header_from", m_HostName);
             }
             catch (Exception e)
             {
@@ -244,7 +246,7 @@ namespace OpenSim.Region.CoreModules.Framework.EMail
             return emailMessage;
         }
 
-        private SceneObjectPart LocatePrim(UUID objectID)
+        private SceneObjectPart LocateObject(UUID objectID)
         {
             lock (m_Scenes)
             {
@@ -278,6 +280,24 @@ namespace OpenSim.Region.CoreModules.Framework.EMail
 
         #region ISMTPModule
 
+        public string FormatAgentAddress(UUID agentID)
+        {
+            var user = LocateUser(agentID);
+            if (user != null)
+                return (user.Email);
+            else
+                return string.Empty;
+        }
+
+        public string FormatObjectAddress(UUID objectID)
+        {
+            var sop = LocateObject(objectID);
+            if (sop != null)
+                return (objectID.ToString() + "@" + SMTP_HOSTNAME);
+            else
+                return string.Empty;
+        }
+
         public void SendMail(string from, string to, string subject, string body)
         {
             var message = this.FormatMessage(from, to, subject, body);
@@ -285,54 +305,6 @@ namespace OpenSim.Region.CoreModules.Framework.EMail
             {
                 this.SendMessages(new List<MimeMessage>() { message });
             }
-        }
-
-        public void SendMail(UUID from, UUID to, string subject, string body)
-        {
-            string fromAddress = string.Empty;
-            string toAddress = string.Empty;
-
-            // Resolve the from UUID.  Should be a single agent or object
-            var sop = LocatePrim(from);
-            if (sop != null)
-            {
-                fromAddress = from.ToString() + "@" + "";
-            }
-
-            if (string.IsNullOrEmpty(fromAddress))
-            {
-                var user = LocateUser(from);
-                if (user != null)
-                    fromAddress = user.Email;
-            }
-
-            if (string.IsNullOrEmpty(fromAddress))
-            {
-                fromAddress = SMTP_SERVER_REPLYTO;
-            }
-
-            // Resolve the "to" address
-
-            // Resolve the from UUID.  Should be a single agent or object
-            sop = LocatePrim(to);
-            if (sop != null)
-            {
-                toAddress = to.ToString() + "@" + "";
-            }
-
-            if (string.IsNullOrEmpty(toAddress))
-            {
-                var user = LocateUser(from);
-                if (user != null)
-                    toAddress = user.Email;
-            }
-
-            var message = this.FormatMessage(fromAddress, toAddress, subject, body);
-            if (message != null)
-            {
-                this.SendMessages(new List<MimeMessage>() { message });
-            }
-
         }
 
         #endregion

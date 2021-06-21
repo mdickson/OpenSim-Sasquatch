@@ -41,6 +41,18 @@ namespace OpenSim.Region.Framework.Interfaces
     public interface ISMTPModule
     {
         /// <summary>
+        /// Fetch the email address on record for the Agent specified by the prvovided agentID.
+        /// </summary>
+        /// <param name="agentID"></param>
+        string FormatAgentAddress(UUID objectID);
+
+        /// <summary>
+        /// Format an email address for the specified object id.
+        /// </summary>
+        /// <param name="objectID"></param>
+        string FormatObjectAddress(UUID objectID);
+
+        /// <summary>
         /// Send an email message using system SMTP configuration.  Validate the from and to using a 
         /// Regex to make sure they are a valid email address.
         /// </summary>
@@ -49,15 +61,5 @@ namespace OpenSim.Region.Framework.Interfaces
         /// <param name="subject"></param>
         /// <param name="body"></param>
         void SendMail(string from, string to, string subject, string body);
-
-        /// <summary>
-        /// Format a MimeMessage using the string values provided.  Validate the from and to using a 
-        /// Regex to make sure they are a valid email address.
-        /// </summary>
-        /// <param name="from"></param>
-        /// <param name="to"></param>
-        /// <param name="subject"></param>
-        /// <param name="body"></param>
-        void SendMail(UUID from, UUID to, string subject, string body);
     }
 }
