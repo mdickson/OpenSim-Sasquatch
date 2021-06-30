@@ -78,10 +78,6 @@ namespace OpenSim.Region.CoreModules.Framework.EMail
             m_Config = config;
             IConfig SMTPConfig;
 
-            IConfig startupConfig = m_Config.Configs["Startup"];
-
-            m_Enabled = (startupConfig.GetString("emailmodule", "DefaultEmailModule") == "DefaultEmailModule");
-
             //Load SMTP SERVER config
             try
             {
@@ -107,11 +103,10 @@ namespace OpenSim.Region.CoreModules.Framework.EMail
             }
             catch (Exception e)
             {
-                m_log.Error("[EMAIL]: DefaultEmailModule not configured: " + e.Message);
+                m_log.Error("[SMTP]: SMTPEmailModule not configured: " + e.Message);
                 m_Enabled = false;
                 return;
             }
-
         }
 
         public void AddRegion(Scene scene)
@@ -136,7 +131,7 @@ namespace OpenSim.Region.CoreModules.Framework.EMail
                 }
             }
 
-            m_log.Info("[EMAIL]: Activated DefaultEmailModule");
+            m_log.Info("[SMTP]: Activated SMTPEmailModule");
         }
 
         public void RemoveRegion(Scene scene)
@@ -185,14 +180,12 @@ namespace OpenSim.Region.CoreModules.Framework.EMail
                 foreach (var message in messages)
                 {
                     client.Send(message);
-
-                    m_log.InfoFormat("[EMAIL]: Email sent to {} from {}", message.To.ToString(), message.From.ToString());
+                    m_log.InfoFormat("[SMTP]: Email sent to {} from {}", message.To.ToString(), message.From.ToString());
                 }
 
                 client.Disconnect(true);
             }
         }
-
 
         /// <summary>
         /// Format a MimeMessage using the string values provided.  Validate the from and to using a 
@@ -221,13 +214,13 @@ namespace OpenSim.Region.CoreModules.Framework.EMail
             // Verify the from and to addresses are valid
             if (EMailreStrict.IsMatch(from) == false)
             {
-                m_log.Error("[EMAIL]: REGEX Problem in EMail Address: " + from);
+                m_log.Error("[SMTP]: REGEX Problem in From EMail Address: " + from);
                 return null;
             }
 
             if (EMailreStrict.IsMatch(to) == false)
             {
-                m_log.Error("[EMAIL]: REGEX Problem in EMail Address: " + to);
+                m_log.Error("[SMTP]: REGEX Problem in To EMail Address: " + to);
                 return null;
             }
 
@@ -301,9 +294,10 @@ namespace OpenSim.Region.CoreModules.Framework.EMail
         public void SendMail(string from, string to, string subject, string body)
         {
             var message = this.FormatMessage(from, to, subject, body);
+
             if (message != null)
             {
-                this.SendMessages(new List<MimeMessage>() { message });
+                SendMessages(new List<MimeMessage>() { message });
             }
         }
 

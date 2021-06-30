@@ -98,6 +98,7 @@ namespace OpenSim.OfflineIM
 
                     m_log.Error("[OfflineIM.V2]: No message transfer module is enabled. Disabling offline messages");
                 }
+
                 m_TransferModule.OnUndeliveredMessage += UndeliveredMessage;
             }
         }
@@ -108,6 +109,7 @@ namespace OpenSim.OfflineIM
                 return;
 
             m_SceneList.Remove(scene);
+
             scene.EventManager.OnNewClient -= OnNewClient;
             m_TransferModule.OnUndeliveredMessage -= UndeliveredMessage;
 
