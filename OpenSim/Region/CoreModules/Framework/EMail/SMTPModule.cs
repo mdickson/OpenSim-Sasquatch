@@ -33,7 +33,6 @@ using System.Text.RegularExpressions;
 using log4net;
 using Nini.Config;
 using OpenMetaverse;
-using OpenSim.Framework;
 using OpenSim.Region.Framework.Interfaces;
 using OpenSim.Region.Framework.Scenes;
 
@@ -48,23 +47,17 @@ namespace OpenSim.Region.CoreModules.Framework.EMail
     [Extension(Path = "/OpenSim/RegionModules", NodeName = "RegionModule", Id = "SMTPModule")]
     public class SMTPModule : ISharedRegionModule, ISMTPModule
     {
-        //
-        // Log
-        //
         private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
-
-        //
-        // Module vars
-        //
-        private IConfigSource m_Config;
-        private string m_HostName = string.Empty;
 
         // SMTP configuration
         private string SMTP_SERVER_HOSTNAME = string.Empty;
         private int    SMTP_SERVER_PORT = 25;
         private string SMTP_SERVER_LOGIN = string.Empty;
         private string SMTP_SERVER_PASSWORD = string.Empty;
+        private string SMTP_SERVER_FROM = string.Empty;
         private string SMTP_SERVER_REPLYTO = string.Empty;
+
+        // This hostname, if we need it for object email.
         private string SMTP_HOSTNAME = string.Empty;
 
         // Scenes by Region Handle
@@ -75,13 +68,12 @@ namespace OpenSim.Region.CoreModules.Framework.EMail
 
         public void Initialise(IConfigSource config)
         {
-            m_Config = config;
             IConfig SMTPConfig;
 
             //Load SMTP SERVER config
             try
             {
-                if ((SMTPConfig = m_Config.Configs["SMTP"]) == null)
+                if ((SMTPConfig = config.Configs["SMTP"]) == null)
                 {
                     m_Enabled = false;
                     return;
@@ -93,17 +85,22 @@ namespace OpenSim.Region.CoreModules.Framework.EMail
                     return;
                 }
 
-                m_HostName = SMTPConfig.GetString("host_domain_header_from", m_HostName);
+                var m_HostName = SMTPConfig.GetString("host_domain_header_from");
+
+                // SMTP Configuration
                 SMTP_SERVER_HOSTNAME = SMTPConfig.GetString("SMTP_SERVER_HOSTNAME", SMTP_SERVER_HOSTNAME);
                 SMTP_SERVER_PORT = SMTPConfig.GetInt("SMTP_SERVER_PORT", SMTP_SERVER_PORT);
                 SMTP_SERVER_LOGIN = SMTPConfig.GetString("SMTP_SERVER_LOGIN", SMTP_SERVER_LOGIN);
                 SMTP_SERVER_PASSWORD = SMTPConfig.GetString("SMTP_SERVER_PASSWORD", SMTP_SERVER_PASSWORD);
+                SMTP_SERVER_FROM = SMTPConfig.GetString("SMTP_SERVER_FROM", SMTP_SERVER_FROM);
                 SMTP_SERVER_REPLYTO = SMTPConfig.GetString("SMTP_SERVER_REPLYTO", SMTP_SERVER_REPLYTO); 
-                SMTP_HOSTNAME = SMTPConfig.GetString("host_domain_header_from", m_HostName);
+
+                // Hostname
+                SMTP_HOSTNAME = SMTPConfig.GetString("SMTP_HOSTNAME", m_HostName);
             }
             catch (Exception e)
             {
-                m_log.Error("[SMTP]: SMTPEmailModule not configured: " + e.Message);
+                m_log.Error("[SMTP]: SMTPModule not configured: " + e.Message);
                 m_Enabled = false;
                 return;
             }
@@ -114,7 +111,7 @@ namespace OpenSim.Region.CoreModules.Framework.EMail
             if (!m_Enabled)
                 return;
 
-        // It's a go!
+            // It's a go!
             lock (m_Scenes)
             {
                 // Claim the interface slot
@@ -131,7 +128,7 @@ namespace OpenSim.Region.CoreModules.Framework.EMail
                 }
             }
 
-            m_log.Info("[SMTP]: Activated SMTPEmailModule");
+            m_log.Info("[SMTP]: Activated SMTPModule");
         }
 
         public void RemoveRegion(Scene scene)
@@ -148,7 +145,7 @@ namespace OpenSim.Region.CoreModules.Framework.EMail
 
         public string Name
         {
-            get { return "DefaultEmailModule"; }
+            get { return "SMTPModule"; }
         }
 
         public Type ReplaceableInterface
