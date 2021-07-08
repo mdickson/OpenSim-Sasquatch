@@ -7,10 +7,6 @@
     <Copyright>Copyright ©  2012</Copyright>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="DotNetOpenMail">
-      <HintPath>..\..\..\bin\DotNetOpenMail.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="Ionic.Zip">
       <HintPath>..\..\..\bin\Ionic.Zip.dll</HintPath>
       <Private>False</Private>
